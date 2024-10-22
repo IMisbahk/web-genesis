@@ -22,6 +22,50 @@
             overflow-x: hidden;
         }
 
+        .header {
+            width: 100%;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .cart-btn-top {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: .8rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all .3s;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .cart-btn-top:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .cart-count {
+            background: white;
+            color: #4CAF50;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .8rem;
+            font-weight: bold;
+        }
+
         .welcome-text {
             text-align: center;
             padding: 2rem;
@@ -142,10 +186,36 @@
         .nav-btn:hover {
             background: #444;
         }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            display: none;
+            animation: slideIn .3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
     </style>
 </head>
 <body>
-    <h1 class="welcome-text">Welcome to Our Pastry Shop</h1>
+    <header class="header">
+        <h1>Pastry Shop</h1>
+        <button class="cart-btn-top" onclick="window.location.href='cart.html'">
+            Cart <span class="cart-count">0</span>
+        </button>
+    </header>
     
     <div class="carousel-container">
         <div class="carousel"></div>
@@ -156,6 +226,8 @@
         <button class="nav-btn next-btn">Next</button>
     </div>
 
+    <div class="toast">Added to cart!</div>
+
     <script>
         $(document).ready(function() {
             let items = [
@@ -164,11 +236,23 @@
                 { id: 3, name: "Chocolate Dream", price: "$45.99", img: "/api/placeholder/200/200" },
                 { id: 4, name: "Vanilla Cloud", price: "$36.99", img: "/api/placeholder/200/200" },
                 { id: 5, name: "Berry Blast", price: "$39.99", img: "/api/placeholder/200/200" },
-                { id: 6, name: "Caramel Wonder", price: "$41.99", img: "/api/placeholder/200/200" }
+                { id: 6, name: "Caramel Wonder", price: "$41.99", img: "/api/placeholder/200/200" },
+                { id: 11, name: "Black Star Cake", price: "$42.99", img: "/api/placeholder/200/200" },
+                { id: 12, name: "Strawberry Delight", price: "$38.99", img: "/api/placeholder/200/200" },
+                { id: 13, name: "Chocolate Dream", price: "$45.99", img: "/api/placeholder/200/200" },
+                { id: 14, name: "Black Star Cake", price: "$42.99", img: "/api/placeholder/200/200" },
+                { id: 15, name: "Strawberry Delight", price: "$38.99", img: "/api/placeholder/200/200" },
+                { id: 16, name: "Chocolate Dream", price: "$45.99", img: "/api/placeholder/200/200" },
+                { id: 17, name: "Black Star Cake", price: "$42.99", img: "/api/placeholder/200/200" },
+                { id: 18, name: "Strawberry Delight", price: "$38.99", img: "/api/placeholder/200/200" },
+                { id: 19, name: "Chocolate Dream", price: "$45.99", img: "/api/placeholder/200/200" }
             ];
 
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            updateCartCount();
+
             let angle = 0;
-            let radius = 1000;
+            let radius = 800;
             let step = 15;
             let center = window.innerWidth / 2;
 
@@ -195,7 +279,7 @@
                                             <p class="price">${item.price}</p>
                                             <p>Made fresh daily with premium ingredients</p>
                                         </div>
-                                        <button class="cart-btn">Add to Cart</button>
+                                        <button class="cart-btn" data-id="${item.id}">Add to Cart</button>
                                     </div>
                                 </div>
                             </div>
@@ -208,6 +292,14 @@
                         opacity: y < radius ? 1 : 0
                     });
                 });
+            }
+
+            function updateCartCount() {
+                $('.cart-count').text(cart.length);
+            }
+
+            function showToast() {
+                $('.toast').fadeIn().delay(2000).fadeOut();
             }
 
             updateCards();
@@ -224,7 +316,12 @@
 
             $(document).on('click', '.cart-btn', function(e) {
                 e.stopPropagation();
-                alert('Added to cart!');
+                let id = $(this).data('id');
+                let item = items.find(i => i.id === id);
+                cart.push({...item, quantity: 1});
+                localStorage.setItem('cart', JSON.stringify(cart));
+                updateCartCount();
+                showToast();
             });
 
             $(window).resize(() => {
