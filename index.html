@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Curved Card Carousel</title>
+    <title>Pastry Shop</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <style>
         * {
@@ -42,20 +42,24 @@
             width: 100%;
             height: 100%;
             display: flex;
-            transition: transform 0.5s ease-out;
+            transition: transform .5s ease-out;
+        }
+
+        .card-wrapper {
+            position: absolute;
+            transition: all .5s ease-out;
         }
 
         .card {
-            position: absolute;
             width: 250px;
             height: 350px;
             transform-style: preserve-3d;
-            transition: all 0.6s;
+            transition: transform .6s;
             cursor: pointer;
         }
 
         .card:hover {
-            transform: rotateY(180deg) translateY(-20px);
+            transform: rotateY(180deg);
         }
 
         .card-face {
@@ -68,7 +72,7 @@
             overflow: hidden;
         }
 
-        .card-front {
+        .front {
             background: white;
             display: flex;
             flex-direction: column;
@@ -76,7 +80,7 @@
             padding: 1rem;
         }
 
-        .card-back {
+        .back {
             background: white;
             transform: rotateY(180deg);
             padding: 1.5rem;
@@ -85,41 +89,41 @@
             justify-content: space-between;
         }
 
-        .product-image {
+        .product-img {
             width: 200px;
             height: 200px;
             object-fit: cover;
             border-radius: 10px;
         }
 
-        .product-title {
+        .title {
             margin-top: 1rem;
             font-size: 1.2rem;
             color: #333;
         }
 
-        .product-price {
-            margin-top: 0.5rem;
+        .price {
+            margin-top: .5rem;
             font-size: 1.1rem;
             color: #666;
         }
 
-        .add-to-cart-btn {
+        .cart-btn {
             background: #4CAF50;
             color: white;
             border: none;
-            padding: 0.8rem 1.5rem;
+            padding: .8rem 1.5rem;
             border-radius: 25px;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: background .3s;
             margin-top: 1rem;
         }
 
-        .add-to-cart-btn:hover {
+        .cart-btn:hover {
             background: #45a049;
         }
 
-        .carousel-nav {
+        .nav {
             position: fixed;
             bottom: 2rem;
             display: flex;
@@ -127,7 +131,7 @@
         }
 
         .nav-btn {
-            padding: 0.5rem 1rem;
+            padding: .5rem 1rem;
             background: #333;
             color: white;
             border: none;
@@ -144,89 +148,88 @@
     <h1 class="welcome-text">Welcome to Our Pastry Shop</h1>
     
     <div class="carousel-container">
-        <div class="carousel">
-            
-        </div>
+        <div class="carousel"></div>
     </div>
 
-    <div class="carousel-nav">
+    <div class="nav">
         <button class="nav-btn prev-btn">Previous</button>
         <button class="nav-btn next-btn">Next</button>
     </div>
 
     <script>
         $(document).ready(function() {
-            const products = [
-                { id: 1, name: "Black Star Cake", price: "$42.99", image: "/api/placeholder/200/200" },
-                { id: 2, name: "Strawberry Delight", price: "$38.99", image: "/api/placeholder/200/200" },
-                { id: 3, name: "Chocolate Dream", price: "$45.99", image: "/api/placeholder/200/200" },
-                { id: 4, name: "Vanilla Cloud", price: "$36.99", image: "/api/placeholder/200/200" },
-                { id: 5, name: "Berry Blast", price: "$39.99", image: "/api/placeholder/200/200" },
-                { id: 6, name: "Caramel Wonder", price: "$41.99", image: "/api/placeholder/200/200" }
+            let items = [
+                { id: 1, name: "Black Star Cake", price: "$42.99", img: "/api/placeholder/200/200" },
+                { id: 2, name: "Strawberry Delight", price: "$38.99", img: "/api/placeholder/200/200" },
+                { id: 3, name: "Chocolate Dream", price: "$45.99", img: "/api/placeholder/200/200" },
+                { id: 4, name: "Vanilla Cloud", price: "$36.99", img: "/api/placeholder/200/200" },
+                { id: 5, name: "Berry Blast", price: "$39.99", img: "/api/placeholder/200/200" },
+                { id: 6, name: "Caramel Wonder", price: "$41.99", img: "/api/placeholder/200/200" }
             ];
 
-            let currentAngle = 0;
-            const radius = 800; 
-            const totalCards = products.length;
-            const angleIncrement = 15; 
-            const centerOffset = window.innerWidth / 2;
+            let angle = 0;
+            let radius = 1000;
+            let step = 15;
+            let center = window.innerWidth / 2;
 
-            function positionCards() {
-                products.forEach((product, index) => {
-                    const angle = (index * angleIncrement) + currentAngle;
-                    const radian = (angle * Math.PI) / 180;
+            function updateCards() {
+                items.forEach((item, i) => {
+                    let currAngle = (i * step) + angle;
+                    let rad = (currAngle * Math.PI) / 180;
                     
-                    const x = Math.sin(radian) * radius;
-                    const y = -Math.cos(radian) * radius + radius; 
+                    let x = Math.sin(rad) * radius;
+                    let y = -Math.cos(rad) * radius + radius;
                     
-                    if (!$(`.card-${product.id}`).length) {
-                        const card = $(`
-                            <div class="card card-${product.id}">
-                                <div class="card-face card-front">
-                                    <img src="${product.image}" alt="${product.name}" class="product-image">
-                                    <h3 class="product-title">${product.name}</h3>
-                                    <p class="product-price">${product.price}</p>
-                                </div>
-                                <div class="card-face card-back">
-                                    <div>
-                                        <h3 class="product-title">${product.name}</h3>
-                                        <p class="product-price">${product.price}</p>
-                                        <p>A delicious pastry made with the finest ingredients.</p>
+                    if (!$(`.w-${item.id}`).length) {
+                        let card = `
+                            <div class="card-wrapper w-${item.id}">
+                                <div class="card">
+                                    <div class="card-face front">
+                                        <img src="${item.img}" alt="${item.name}" class="product-img">
+                                        <h3 class="title">${item.name}</h3>
+                                        <p class="price">${item.price}</p>
                                     </div>
-                                    <button class="add-to-cart-btn">Add to Cart</button>
+                                    <div class="card-face back">
+                                        <div>
+                                            <h3 class="title">${item.name}</h3>
+                                            <p class="price">${item.price}</p>
+                                            <p>Made fresh daily with premium ingredients</p>
+                                        </div>
+                                        <button class="cart-btn">Add to Cart</button>
+                                    </div>
                                 </div>
                             </div>
-                        `);
+                        `;
                         $('.carousel').append(card);
                     }
 
-                    $(`.card-${product.id}`).css({
-                        transform: `translate(${x + centerOffset}px, ${y}px)`,
-                        opacity: y < radius ? 1 : 0 
+                    $(`.w-${item.id}`).css({
+                        transform: `translate(${x + center}px, ${y}px)`,
+                        opacity: y < radius ? 1 : 0
                     });
                 });
             }
 
-            positionCards();
+            updateCards();
 
             $('.next-btn').click(() => {
-                currentAngle -= angleIncrement;
-                positionCards();
+                angle -= step;
+                updateCards();
             });
 
             $('.prev-btn').click(() => {
-                currentAngle += angleIncrement;
-                positionCards();
+                angle += step;
+                updateCards();
             });
 
-            $(document).on('click', '.add-to-cart-btn', function(e) {
+            $(document).on('click', '.cart-btn', function(e) {
                 e.stopPropagation();
-                alert('Item added to cart!');
+                alert('Added to cart!');
             });
 
             $(window).resize(() => {
-                centerOffset = window.innerWidth / 2;
-                positionCards();
+                center = window.innerWidth / 2;
+                updateCards();
             });
         });
     </script>
