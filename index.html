@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curved Card Carousel</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #f5f5f5;
+            font-family: Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
+        .welcome-text {
+            text-align: center;
+            padding: 2rem;
+            font-size: 2rem;
+            color: #333;
+        }
+
+        .carousel-container {
+            position: relative;
+            width: 100vw;
+            height: 500px;
+            margin-top: 2rem;
+            overflow: hidden;
+        }
+
+        .carousel {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            transition: transform 0.5s ease-out;
+        }
+
+        .card {
+            position: absolute;
+            width: 250px;
+            height: 350px;
+            transform-style: preserve-3d;
+            transition: all 0.6s;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: rotateY(180deg) translateY(-20px);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .card-front {
+            background: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .card-back {
+            background: white;
+            transform: rotateY(180deg);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .product-image {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .product-title {
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        .product-price {
+            margin-top: 0.5rem;
+            font-size: 1.1rem;
+            color: #666;
+        }
+
+        .add-to-cart-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 1rem;
+        }
+
+        .add-to-cart-btn:hover {
+            background: #45a049;
+        }
+
+        .carousel-nav {
+            position: fixed;
+            bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            padding: 0.5rem 1rem;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .nav-btn:hover {
+            background: #444;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="welcome-text">Welcome to Our Pastry Shop</h1>
+    
+    <div class="carousel-container">
+        <div class="carousel">
+            
+        </div>
+    </div>
+
+    <div class="carousel-nav">
+        <button class="nav-btn prev-btn">Previous</button>
+        <button class="nav-btn next-btn">Next</button>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            const products = [
+                { id: 1, name: "Black Star Cake", price: "$42.99", image: "/api/placeholder/200/200" },
+                { id: 2, name: "Strawberry Delight", price: "$38.99", image: "/api/placeholder/200/200" },
+                { id: 3, name: "Chocolate Dream", price: "$45.99", image: "/api/placeholder/200/200" },
+                { id: 4, name: "Vanilla Cloud", price: "$36.99", image: "/api/placeholder/200/200" },
+                { id: 5, name: "Berry Blast", price: "$39.99", image: "/api/placeholder/200/200" },
+                { id: 6, name: "Caramel Wonder", price: "$41.99", image: "/api/placeholder/200/200" }
+            ];
+
+            let currentAngle = 0;
+            const radius = 800; 
+            const totalCards = products.length;
+            const angleIncrement = 15; 
+            const centerOffset = window.innerWidth / 2;
+
+            function positionCards() {
+                products.forEach((product, index) => {
+                    const angle = (index * angleIncrement) + currentAngle;
+                    const radian = (angle * Math.PI) / 180;
+                    
+                    const x = Math.sin(radian) * radius;
+                    const y = -Math.cos(radian) * radius + radius; 
+                    
+                    if (!$(`.card-${product.id}`).length) {
+                        const card = $(`
+                            <div class="card card-${product.id}">
+                                <div class="card-face card-front">
+                                    <img src="${product.image}" alt="${product.name}" class="product-image">
+                                    <h3 class="product-title">${product.name}</h3>
+                                    <p class="product-price">${product.price}</p>
+                                </div>
+                                <div class="card-face card-back">
+                                    <div>
+                                        <h3 class="product-title">${product.name}</h3>
+                                        <p class="product-price">${product.price}</p>
+                                        <p>A delicious pastry made with the finest ingredients.</p>
+                                    </div>
+                                    <button class="add-to-cart-btn">Add to Cart</button>
+                                </div>
+                            </div>
+                        `);
+                        $('.carousel').append(card);
+                    }
+
+                    $(`.card-${product.id}`).css({
+                        transform: `translate(${x + centerOffset}px, ${y}px)`,
+                        opacity: y < radius ? 1 : 0 
+                    });
+                });
+            }
+
+            positionCards();
+
+            $('.next-btn').click(() => {
+                currentAngle -= angleIncrement;
+                positionCards();
+            });
+
+            $('.prev-btn').click(() => {
+                currentAngle += angleIncrement;
+                positionCards();
+            });
+
+            $(document).on('click', '.add-to-cart-btn', function(e) {
+                e.stopPropagation();
+                alert('Item added to cart!');
+            });
+
+            $(window).resize(() => {
+                centerOffset = window.innerWidth / 2;
+                positionCards();
+            });
+        });
+    </script>
+</body>
+</html>
